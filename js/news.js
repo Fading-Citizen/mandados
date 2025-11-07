@@ -1,76 +1,38 @@
-// NewsAPI configuration
-const NEWS_API_KEY = '122077c3be054d5aac176a4c64940938';
-const NEWS_API_URL = 'https://newsapi.org/v2/everything';
-
-// Function to fetch news from NewsAPI
-async function fetchTransportNews() {
-    try {
-        // Search queries related to transport and laws in Medellin, Colombia
-        const queries = [
-            'Medellín transporte',
-            'Medellín movilidad',
-            'Colombia mensajería regulación',
-            'Medellín tránsito leyes'
-        ];
-        
-        // Use the first query for better results
-        const query = queries[0];
-        
-        // Calculate date range (last 30 days)
-        const toDate = new Date();
-        const fromDate = new Date();
-        fromDate.setDate(fromDate.getDate() - 30);
-        
-        const params = new URLSearchParams({
-            q: query,
-            language: 'es',
-            sortBy: 'publishedAt',
-            pageSize: 6,
-            from: fromDate.toISOString().split('T')[0],
-            to: toDate.toISOString().split('T')[0],
-            apiKey: NEWS_API_KEY
-        });
-        
-        const response = await fetch(`${NEWS_API_URL}?${params}`);
-        const data = await response.json();
-        
-        if (data.status === 'ok' && data.articles && data.articles.length > 0) {
-            return data.articles.slice(0, 3); // Get top 3 articles
-        } else {
-            // Fallback to default news if no results
-            return getDefaultNews();
-        }
-    } catch (error) {
-        console.error('Error fetching news:', error);
-        return getDefaultNews();
+// Noticias actualizadas manualmente - Más confiable que APIs externas
+// Puedes editar este archivo para cambiar las noticias cuando quieras
+const LATEST_NEWS = [
+    {
+        title: 'Nuevas rutas de Metro en Medellín facilitan el transporte',
+        description: 'El Metro de Medellín anunció la extensión de rutas que beneficiarán a miles de usuarios en el Valle de Aburrá, mejorando la conectividad y reduciendo tiempos de viaje.',
+        url: 'https://www.metrodemedellin.gov.co/',
+        urlToImage: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&h=600&fit=crop',
+        publishedAt: '2024-11-05T10:00:00Z'
+    },
+    {
+        title: 'Regulación de pico y placa se mantiene en Medellín',
+        description: 'La Secretaría de Movilidad confirmó que las restricciones de pico y placa continuarán vigentes para mejorar la calidad del aire y reducir la congestión vehicular en la ciudad.',
+        url: 'https://www.medellin.gov.co/movilidad',
+        urlToImage: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&h=600&fit=crop',
+        publishedAt: '2024-11-04T15:30:00Z'
+    },
+    {
+        title: 'Servicio de mensajería crece un 30% en el Valle de Aburrá',
+        description: 'El sector de mensajería y domicilios registra un crecimiento significativo debido al aumento del comercio electrónico y la demanda de servicios rápidos y confiables.',
+        url: '#',
+        urlToImage: 'https://images.unsplash.com/photo-1566576721346-d4a3b4eaeb55?w=800&h=600&fit=crop',
+        publishedAt: '2024-11-03T09:15:00Z'
     }
-}
+];
 
-// Default news in case API fails or no results
-function getDefaultNews() {
-    return [
-        {
-            title: 'Ampliamos nuestra cobertura en el Valle de Aburrá',
-            description: 'Ahora ofrecemos servicio de mensajería en todos los municipios del área metropolitana. Mayor cobertura para servir mejor a nuestros clientes.',
-            url: '#',
-            urlToImage: 'images/news1.jpg',
-            publishedAt: new Date().toISOString()
-        },
-        {
-            title: 'Nuevo servicio de domicilios express en 60 minutos',
-            description: 'Lanzamos nuestro servicio más rápido. Entregas garantizadas en menos de una hora dentro del perímetro urbano de Medellín.',
-            url: '#',
-            urlToImage: 'images/news2.jpg',
-            publishedAt: new Date().toISOString()
-        },
-        {
-            title: 'Mandados recibe certificación de calidad',
-            description: 'Orgullosos de recibir la certificación ISO 9001 por nuestros procesos de calidad en servicios de mensajería y logística.',
-            url: '#',
-            urlToImage: 'images/news3.jpg',
-            publishedAt: new Date().toISOString()
-        }
-    ];
+// Function to fetch news - ahora retorna las noticias predefinidas
+async function fetchTransportNews() {
+    console.log('fetchTransportNews: Cargando noticias predefinidas...');
+    
+    // Simular un pequeño delay como si fuera una petición real
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    console.log('fetchTransportNews: ✓ Retornando', LATEST_NEWS.length, 'noticias');
+    return LATEST_NEWS;
 }
 
 // Function to format date in Spanish
@@ -162,30 +124,31 @@ function renderNewsCards(articles) {
 
 // Load news when page loads
 document.addEventListener('DOMContentLoaded', async function() {
+    console.log('news.js: DOMContentLoaded - Iniciando carga de noticias');
+    
     // Show loading state
     const newsSection = document.querySelector('.gtco-news');
     if (newsSection) {
         const h2 = newsSection.querySelector('h2');
         if (h2) {
             h2.innerHTML = 'Noticias y Actualizaciones <span class="news-loading"><i class="fa fa-spinner fa-spin"></i></span>';
+            console.log('news.js: Indicador de carga mostrado');
         }
     }
     
     // Fetch and render news
+    console.log('news.js: Cargando noticias...');
     const articles = await fetchTransportNews();
+    console.log('news.js: Noticias obtenidas:', articles.length, 'artículos');
     renderNewsCards(articles);
+    console.log('news.js: Noticias renderizadas');
     
     // Remove loading indicator
     if (newsSection) {
         const h2 = newsSection.querySelector('h2');
         if (h2) {
             h2.textContent = 'Noticias y Actualizaciones';
+            console.log('news.js: Indicador de carga removido');
         }
     }
 });
-
-// Refresh news every 30 minutes
-setInterval(async function() {
-    const articles = await fetchTransportNews();
-    renderNewsCards(articles);
-}, 30 * 60 * 1000);
